@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { steps } from "../../../data/stepperForm"
+import RightSectionImage from "../../../public/assets/Artboard 1.svg"
 import axios from 'axios';
 
 export default function StepperForm() {
@@ -219,7 +220,10 @@ export default function StepperForm() {
         </div>
 
         {/* Background Image */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-cover bg-center" style={{ backgroundImage: "url('/assets/bta.png')" }}></div>
+        <div
+  className="fixed right-0 top-0 bottom-0 w-1/3 h-screen bg-cover bg-center"
+  style={{ backgroundImage: "url('/assets/Artboard 1.svg')" }}
+></div>
       </div>
     </div>
   )
