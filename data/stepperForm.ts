@@ -14,7 +14,7 @@ export const steps: Step[] = [
         { label: "Current Startup Stage", type: "dropdown", options: ["Idea", "MVP", "Early Revenue", "Growth", "Scaling"] },
         { label: "Total Number of Employees (Full-Time)", type: "number" },
         { label: "Total Number of Founders", type: "number" },
-        { label: "Does your startup have a legal entity?", type: "select", options: ["Yes", "No"] },
+        { label: "Does your startup have a legal entity (Private Limited, LLP, etc.)?", type: "select", options: ["Yes", "No"] },
       ],
     },
     {
