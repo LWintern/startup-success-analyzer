@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 "use client"
 
 import { useState } from "react"
@@ -5,97 +12,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
-
-// Define types for the fields and steps
-type Field = {
-  label: string
-  type: "text" | "number" | "dropdown" | "select" | "checkbox"
-  options?: string[]
-}
-
-type Step = {
-  id: number
-  title: string
-  fields: Field[]
-}
+import { steps } from "../../../data/stepperForm"
+import axios from 'axios';
 
 export default function StepperForm() {
-  // Define your custom steps and fields
-  const steps: Step[] = [
-    {
-      id: 1,
-      title: "General Startup Information",
-      fields: [
-        { label: "Startup Name", type: "text" },
-        { label: "Founder’s Name", type: "text" },
-        { label: "Founder’s Contact Email & Phone", type: "text" },
-        { label: "Startup Registration Year", type: "dropdown", options: Array.from({ length: 11 }, (_, i) => (2014 + i).toString()) },
-        { label: "Are you registered with IStart Rajasthan?", type: "select", options: ["Yes", "No"] },
-        { label: "Startup Industry/Sector", type: "dropdown", options: ["IT", "EdTech", "AgriTech", "HealthTech"] },
-        { label: "Current Startup Stage", type: "dropdown", options: ["Idea", "MVP", "Early Revenue", "Growth", "Scaling"] },
-        { label: "Total Number of Employees (Full-Time)", type: "number" },
-        { label: "Total Number of Founders", type: "number" },
-        { label: "Does your startup have a legal entity?", type: "select", options: ["Yes", "No"] },
-      ],
-    },
-    {
-      id: 2,
-      title: "Financial Performance & Funding",
-      fields: [
-        { label: "Has your startup generated revenue in the last 2 years?", type: "select", options: ["Yes", "No"] },
-        { label: "Total revenue in the last 2 years?", type: "dropdown", options: ["₹0", "<₹10L", "₹10L-₹50L", "₹50L-₹1Cr", ">₹1Cr"] },
-        { label: "Have you raised external funding?", type: "select", options: ["Yes", "No"] },
-        { label: "If yes, how much funding have you raised?", type: "dropdown", options: ["Bootstrapped", "₹0-₹10L", "₹10L-₹50L", "₹50L-₹1Cr", ">₹1Cr"] },
-        { label: "Primary source of funding?", type: "dropdown", options: ["Self-funded", "Angel", "VC", "Government Grant"] },
-        { label: "Is your startup currently profitable?", type: "select", options: ["Yes", "No"] },
-        { label: "Biggest financial challenge?", type: "dropdown", options: ["No revenue", "High expenses", "Investor rejection"] },
-      ],
-    },
-    {
-      id: 3,
-      title: "Market Traction & Customer Engagement",
-      fields: [
-        { label: "Do you have a Minimum Viable Product (MVP)?", type: "select", options: ["Yes", "No"] },
-        { label: "Is your product/service currently in use?", type: "select", options: ["Yes", "No"] },
-        { label: "Do you have paying customers?", type: "select", options: ["Yes", "No"] },
-        { label: "How many paying customers do you have?", type: "dropdown", options: ["0", "1-10", "11-50", "51-100", ">100"] },
-        { label: "What is your primary business model?", type: "dropdown", options: ["Subscription", "One-time sale", "Service-based", "Ad Revenue"] },
-        { label: "What are your main customer acquisition channels?", type: "checkbox", options: ["Social Media", "Paid Ads", "Partnerships", "Referrals"] },
-        { label: "What is your biggest challenge in acquiring customers?", type: "dropdown", options: ["High competition", "Pricing", "Awareness"] },
-      ],
-    },
-    {
-      id: 4,
-      title: "Technology & Innovation",
-      fields: [
-        { label: "Is your startup tech-enabled?", type: "select", options: ["Yes", "No"] },
-        { label: "Are you using emerging technologies (AI, Blockchain, IoT, etc.)?", type: "select", options: ["Yes", "No"] },
-        { label: "Do you have IP protection (patents, trademarks, copyrights)?", type: "select", options: ["Yes", "No"] },
-        { label: "Biggest technical challenge faced?", type: "dropdown", options: ["Scalability", "Security", "Cost", "Lack of Developers"] },
-      ],
-    },
-    {
-      id: 5,
-      title: "Team & Operations",
-      fields: [
-        { label: "Do you have co-founders?", type: "select", options: ["Yes", "No"] },
-        { label: "Does your core team have industry expertise?", type: "select", options: ["Yes", "No"] },
-        { label: "Biggest operational challenge?", type: "dropdown", options: ["Hiring", "Funding", "Market Fit", "Scaling"] },
-      ],
-    },
-    {
-      id: 6,
-      title: "Reason for Struggle & Support Required",
-      fields: [
-        { label: "Primary reason for your startup’s struggle?", type: "dropdown", options: ["Funding", "Team", "Market Fit", "Technology", "Legal"] },
-        { label: "What type of support do you need?", type: "checkbox", options: ["Funding", "Business Mentorship", "Tech Support", "Strategy"] },
-        { label: "Are you willing to undergo a structured restart program?", type: "select", options: ["Yes", "No"] },
-      ],
-    },
-  ]
-
   const totalSteps = steps.length
   const [activeStep, setActiveStep] = useState<number>(1)
+  const [formData, setFormData] = useState<Record<string, string | string[]>>({})
 
   const handleNext = () => {
     if (activeStep < totalSteps) {
@@ -106,6 +29,34 @@ export default function StepperForm() {
   const handlePrevious = () => {
     if (activeStep > 1) {
       setActiveStep(activeStep - 1)
+    }
+  }
+
+  const handleChange = (fieldId: string, value: string | string[]) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [fieldId]: value,
+    }))
+  }
+
+  const isFormComplete = () => {
+    const currentFields = steps.flatMap(step => step.fields)
+    return currentFields.every(field => {
+      const value = formData[field.label]
+      return field.type === "checkbox" ? Array.isArray(value) && value.length > 0 : value
+    })
+  }
+
+  const handleSubmit = async () => {
+    if (isFormComplete()) {
+      try {
+        const response = await axios.post('/api/formdata', formData);
+        console.log('Form submitted:', response.data);
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      }
+    } else {
+      alert('Please fill in all required fields.');
     }
   }
 
@@ -139,11 +90,6 @@ export default function StepperForm() {
         <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 pl-8 relative z-10">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-sm text-gray-500">Approx Time: 2 Mins</h2>
-            <div className="text-blue-800 font-medium text-sm">
-              <a href="#" className="hover:underline">
-                Download
-              </a>
-            </div>
           </div>
 
           {/* Form Fields */}
@@ -153,10 +99,31 @@ export default function StepperForm() {
                 <label htmlFor={`field-${index}`} className="text-gray-600 text-right">
                   {field.label}
                 </label>
-                {field.type === "text" && <Input id={`field-${index}`} className="border border-gray-300" />}
-                {field.type === "number" && <Input id={`field-${index}`} type="number" className="border border-gray-300" />}
+                {field.type === "text" && (
+                  <Input
+                    id={`field-${index}`}
+                    className="border border-gray-300"
+                    value={formData[field.label] as string || ""}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                  />
+                )}
+                {field.type === "number" && (
+                  <Input
+                    id={`field-${index}`}
+                    type="number"
+                    className="border border-gray-300"
+                    value={formData[field.label] as string || ""}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                  />
+                )}
                 {field.type === "dropdown" && (
-                  <select id={`field-${index}`} className="border border-gray-300 p-2 rounded">
+                  <select
+                    id={`field-${index}`}
+                    className="border border-gray-300 p-2 rounded"
+                    value={formData[field.label] as string || ""}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                  >
+                    <option value="">Select</option>
                     {field.options?.map((option, i) => (
                       <option key={i} value={option}>
                         {option}
@@ -164,20 +131,55 @@ export default function StepperForm() {
                     ))}
                   </select>
                 )}
-                {field.type === "select" && (
-                  <select id={`field-${index}`} className="border border-gray-300 p-2 rounded">
-                    {field.options?.map((option, i) => (
-                      <option key={i} value={option}>
+                {field.type === "select" && field.options?.includes("Yes") && field.options?.includes("No") ? (
+                  <div className="flex gap-4">
+                    {field.options.map((option, i) => (
+                      <label key={i} className="flex items-center">
+                        <input
+                          type="radio"
+                          name={`field-${index}`}
+                          value={option}
+                          checked={formData[field.label] === option}
+                          onChange={(e) => handleChange(field.label, e.target.value)}
+                          className="mr-2"
+                        />
                         {option}
-                      </option>
+                      </label>
                     ))}
-                  </select>
+                  </div>
+                ) : (
+                  field.type === "select" && (
+                    <select
+                      id={`field-${index}`}
+                      className="border border-gray-300 p-2 rounded"
+                      value={formData[field.label] as string || ""}
+                      onChange={(e) => handleChange(field.label, e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      {field.options?.map((option, i) => (
+                        <option key={i} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  )
                 )}
                 {field.type === "checkbox" && (
                   <div className="flex flex-wrap gap-2">
                     {field.options?.map((option, i) => (
                       <label key={i} className="flex items-center">
-                        <input type="checkbox" value={option} className="mr-2" />
+                        <input
+                          type="checkbox"
+                          value={option}
+                          checked={(formData[field.label] as string[] || []).includes(option)}
+                          onChange={(e) => {
+                            const newValue = e.target.checked
+                              ? [...(formData[field.label] as string[] || []), option]
+                              : (formData[field.label] as string[] || []).filter((val) => val !== option)
+                            handleChange(field.label, newValue)
+                          }}
+                          className="mr-2"
+                        />
                         {option}
                       </label>
                     ))}
@@ -202,16 +204,22 @@ export default function StepperForm() {
                 PREVIOUS
               </Button>
 
-              <Button onClick={handleNext} className="bg-[#ff0000] hover:bg-red-700" disabled={activeStep === totalSteps}>
-                NEXT
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+              {activeStep === totalSteps ? (
+                <Button onClick={handleSubmit} className="bg-[#ff0000] hover:bg-red-700">
+                  SUBMIT
+                </Button>
+              ) : (
+                <Button onClick={handleNext} className="bg-[#ff0000] hover:bg-red-700">
+                  NEXT
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
 
         {/* Background Image */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-cover bg-center" style={{ backgroundImage: "url('/path/to/your/image.jpg')" }}></div>
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-cover bg-center" style={{ backgroundImage: "url('/assets/bta.png')" }}></div>
       </div>
     </div>
   )
