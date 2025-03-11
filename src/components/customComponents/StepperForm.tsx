@@ -66,7 +66,7 @@ export default function StepperForm() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen max-w-6xl mx-auto w-full">
       {/* Left sidebar */}
-      <div className="flex md:flex-col md:w-80 bg-gradient-to-r from-[#520000] via-[#710000] via-[#a50000] to-[#ce0000] rounded-r-lg text-white p-6">
+      <div className="flex md:flex-col md:w-80 z-10 bg-gradient-to-r from-[#520000] via-[#710000] via-[#a50000] to-[#ce0000] rounded-r-lg text-white p-6">
         <div className="flex md:flex-col space-x-4 md:space-x-0 md:space-y-6 my-auto overflow-x-auto">
           {steps.map((step) => (
             <div key={step.id} className="flex items-center gap-4 justify-between">
@@ -221,7 +221,7 @@ export default function StepperForm() {
 
         {/* Background Image */}
         <div
-  className="fixed right-0 top-0 bottom-0 w-1/3 h-screen bg-cover bg-center"
+  className="fixed right-0 top-0 z-0 bottom-0 w-1/3 h-screen bg-cover bg-center"
   style={{ backgroundImage: "url('/assets/Artboard 1.svg')" }}
 ></div>
       </div>
