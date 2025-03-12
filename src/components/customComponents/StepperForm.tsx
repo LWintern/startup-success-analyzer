@@ -14,6 +14,11 @@ import { sampleData } from "../../../data/sampleData";
 import { evaluateStartup } from "../../../utils/formula";
 import FormDataDisplay from './FormDataDisplay';
 
+interface StartupEvaluation {
+  totalScore: number;
+  category: string;
+}
+
 export default function StepperForm() {
   const totalSteps = steps.length;
   const [activeStep, setActiveStep] = useState<number>(1);
@@ -68,12 +73,12 @@ export default function StepperForm() {
       financialHealth: parseInt(formData['Financial Health'] as string) || 0,
       teamStrength: parseInt(formData['Team Strength'] as string) || 0,
       productViability: parseInt(formData['Product Viability'] as string) || 0,
-      operationalEfficiency: parseInt(formData['Operational Efficiency'] as string) || 0,
+    
       growthBarriers: parseInt(formData['Growth Barriers'] as string) || 0,
       competitiveEdge: parseInt(formData['Competitive Edge'] as string) || 0,
     };
   
-    const { totalScore, category } = evaluateStartup(startupData);
+    const { totalScore, category } = evaluateStartup(startupData) as StartupEvaluation;
   
     return {
       ...startupData,
