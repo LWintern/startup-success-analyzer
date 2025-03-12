@@ -1,40 +1,43 @@
-// pages/api/formdata.js
+import { evaluateStartup } from '../../utils/formula';
 
-import { calculateScore } from '../../utils/formula';
-import mongoose from 'mongoose';
-
-// Connect to MongoDB
-const connectDB = async () => {
-  if (mongoose.connections[0].readyState) return;
-  await mongoose.connect('mongodb://localhost:27017/stepperForm', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-};
-
-// Define a schema and model for the form data
-const formDataSchema = new mongoose.Schema({
-  data: Object,
-  score: Number,
-});
-
-const FormData = mongoose.models.FormData || mongoose.model('FormData', formDataSchema);
-
-export default async function handler(req, res) {
-  await connectDB();
-
+export default function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const formData = req.body;
-      const score = calculateScore(formData);
 
-      const newFormData = new FormData({ data: formData, score });
-      await newFormData.save();
-      res.status(201).json({ message: 'Form data saved successfully', score });
+      // Validate input
+      if (!formData || typeof formData !== 'object') {
+        return res.status(400).json({ error: 'Invalid form data' });
+      }
+
+      // Prepare data for the evaluateStartup function
+      const startupData = {
+        revenueGrowth: parseInt(formData['Revenue Growth']) || 0,
+        marketDemand: parseInt(formData['Market Demand']) || 0,
+        financialHealth: parseInt(formData['Financial Health']) || 0,
+        teamStrength: parseInt(formData['Team Strength']) || 0,
+        productViability: parseInt(formData['Product Viability']) || 0,
+        operationalEfficiency: parseInt(formData['Operational Efficiency']) || 0,
+        growthBarriers: parseInt(formData['Growth Barriers']) || 0,
+        competitiveEdge: parseInt(formData['Competitive Edge']) || 0,
+      };
+
+      // Evaluate the startup using the new function
+      const { totalScore, category } = evaluateStartup(startupData);
+
+      // Respond with the entire form data, the calculated score, and the category
+      res.status(200).json({ 
+        message: 'Form data received', 
+        formData,
+        totalScore,
+        category 
+      });
     } catch (error) {
-      res.status(500).json({ error: 'Error saving form data' });
+      console.error('Error processing form data:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   } else {
+    // Handle any other HTTP method
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
