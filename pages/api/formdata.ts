@@ -1,6 +1,26 @@
 import { evaluateStartup } from '../../utils/formula';
 
-export default function handler(req, res) {
+// Define the type for the startup data
+type StartupData = {
+  revenueGrowth: number;
+  marketDemand: number;
+  financialHealth: number;
+  teamStrength: number;
+  productViability: number;
+  operationalEfficiency: number;
+  growthBarriers: number;
+  competitiveEdge: number;
+};
+
+// Define the type for the response data
+type ResponseData = {
+  message: string;
+  formData: Record<string, any>;
+  totalScore: number;
+  category: string;
+};
+
+export default function handler(req: any, res: any) {
   if (req.method === 'POST') {
     try {
       const formData = req.body;
@@ -11,7 +31,7 @@ export default function handler(req, res) {
       }
 
       // Prepare data for the evaluateStartup function
-      const startupData = {
+      const startupData: StartupData = {
         revenueGrowth: parseInt(formData['Revenue Growth']) || 0,
         marketDemand: parseInt(formData['Market Demand']) || 0,
         financialHealth: parseInt(formData['Financial Health']) || 0,
@@ -26,12 +46,14 @@ export default function handler(req, res) {
       const { totalScore, category } = evaluateStartup(startupData);
 
       // Respond with the entire form data, the calculated score, and the category
-      res.status(200).json({ 
-        message: 'Form data received', 
+      const responseData: ResponseData = {
+        message: 'Form data received',
         formData,
         totalScore,
-        category 
-      });
+        category
+      };
+
+      res.status(200).json(responseData);
     } catch (error) {
       console.error('Error processing form data:', error);
       res.status(500).json({ error: 'Internal Server Error' });
