@@ -1,8 +1,13 @@
 
-"use client"
+
+
+
+
+
+
 
 // src/components/customComponents/StepperForm.tsx
-
+"use client"
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,12 +17,8 @@ import { steps } from "../../../data/stepperForm";
 import axios from 'axios';
 import { sampleData } from "../../../data/sampleData";
 import { evaluateStartup } from "../../../utils/formula";
+import { StartupData } from "../../../types/formula";
 import FormDataDisplay from './FormDataDisplay';
-
-interface StartupEvaluation {
-  totalScore: number;
-  category: string;
-}
 
 export default function StepperForm() {
   const totalSteps = steps.length;
@@ -65,38 +66,44 @@ export default function StepperForm() {
 
 
 
-  const calculateResult = () => {
-    // Prepare data for the evaluateStartup function
-    const startupData = {
-      revenueGrowth: parseInt(formData['Revenue Growth'] as string) || 0,
-      marketDemand: parseInt(formData['Market Demand'] as string) || 0,
-      financialHealth: parseInt(formData['Financial Health'] as string) || 0,
-      teamStrength: parseInt(formData['Team Strength'] as string) || 0,
-      productViability: parseInt(formData['Product Viability'] as string) || 0,
-    
-      growthBarriers: parseInt(formData['Growth Barriers'] as string) || 0,
-      competitiveEdge: parseInt(formData['Competitive Edge'] as string) || 0,
+  const calculateResult = (): any => {
+    const startupData: StartupData = {
+      revenueGrowth: parseFloat(formData['Revenue Growth'] as string) || 0,
+      marketDemand: parseFloat(formData['Market Demand'] as string) || 0,
+      financialHealth: parseFloat(formData['Financial Health'] as string) || 0,
+      teamStrength: parseFloat(formData['Team Strength'] as string) || 0,
+      productViability: parseFloat(formData['Product Viability'] as string) || 0,
+      operationalEfficiency: parseFloat(formData['Operational Efficiency'] as string) || 0,
+      growthBarriers: parseFloat(formData['Growth Barriers'] as string) || 0,
+      competitiveEdge: parseFloat(formData['Competitive Edge'] as string) || 0,
     };
   
-    const { totalScore, category } = evaluateStartup(startupData) as StartupEvaluation;
+    const isValid = Object.values(startupData).every(
+      (score) => typeof score === 'number' && score >= 0 && score <= 10
+    );
   
-    return {
-      ...startupData,
-      totalScore,
-      category
-    };
+    if (!isValid) {
+      throw new Error('All scores must be numbers between 0 and 10');
+    }
+  
+    const { totalScore, category } = evaluateStartup(startupData);
+  
+    // Return all fields along with totalScore and category
+    return { ...startupData, totalScore, category };
   };
-  
+
   const handleSubmit = async () => {
     if (isFormComplete()) {
       setIsSubmitting(true);
       try {
         const response = await axios.post('/api/formdata', formData);
         const result = calculateResult();
-        setReportData(result);
+        console.log(result); // Log the result to verify its contents
+        setReportData(result); // Ensure this line is setting the correct data
         setReportVisible(true);
       } catch (error) {
         console.error('Error submitting form:', error);
+        alert('There was an error processing your form. Please check your inputs.');
       } finally {
         setIsSubmitting(false);
       }
@@ -105,11 +112,6 @@ export default function StepperForm() {
     }
   };
 
-
-
-
-
-  // ... rest of the component
   useEffect(() => {
     if (activeStep === totalSteps) {
       if (isStepComplete(totalSteps)) {
@@ -123,6 +125,8 @@ export default function StepperForm() {
     setCompletedSteps(new Set(Array.from({ length: totalSteps }, (_, i) => i + 1)));
     setActiveStep(totalSteps);
   }, []);
+
+
 
   const currentStep = steps[activeStep - 1];
 
@@ -150,37 +154,27 @@ export default function StepperForm() {
       </div>
 
       <div className="flex-1 p-4 flex items-center relative ml-0 md:-ml-16 lg:-ml-16">
-      
-      
-      
-      
-       {reportVisible ? (
+      {reportVisible ? (
   <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 pl-8 relative z-10">
     <h2 className="text-2xl font-bold mb-4">Report</h2>
     <div className="space-y-2">
-      <p>Revenue Growth: {reportData.revenueGrowth}</p>
-      <p>Market Demand: {reportData.marketDemand}</p>
-      <p>Financial Health: {reportData.financialHealth}</p>
-      <p>Team Strength: {reportData.teamStrength}</p>
-      <p>Product Viability: {reportData.productViability}</p>
-      <p>Operational Efficiency: {reportData.operationalEfficiency}</p>
-      <p>Growth Barriers: {reportData.growthBarriers}</p>
-      <p>Competitive Edge: {reportData.competitiveEdge}</p>
-      <p>Total Score: {reportData.totalScore}</p>
-      <p>Category: {reportData.category}</p>
+      <p>Revenue Growth: {reportData?.revenueGrowth}</p>
+      <p>Market Demand: {reportData?.marketDemand}</p>
+      <p>Financial Health: {reportData?.financialHealth}</p>
+      <p>Team Strength: {reportData?.teamStrength}</p>
+      <p>Product Viability: {reportData?.productViability}</p>
+      <p>Operational Efficiency: {reportData?.operationalEfficiency}</p>
+      <p>Growth Barriers: {reportData?.growthBarriers}</p>
+      <p>Competitive Edge: {reportData?.competitiveEdge}</p>
+      <p>Total Score: {reportData?.totalScore}</p>
+      <p>Category: {reportData?.category}</p>
     </div>
     <FormDataDisplay data={formData} />
     <Button onClick={() => setReportVisible(false)} className="mt-4 bg-[#ff0000] hover:bg-red-700">
       Back to Form
     </Button>
   </div>
-) : (
-  
-
-
-
-
-
+)  : (
           <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 pl-8 relative z-10">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-sm text-gray-500">Approx Time: 2 Mins</h2>
@@ -211,6 +205,8 @@ export default function StepperForm() {
                     <Input
                       id={`field-${index}`}
                       type="number"
+                      min={0}
+                      max={10}
                       className="border border-gray-300"
                       value={formData[field.label] as string || ""}
                       onChange={(e) => handleChange(field.label, e.target.value)}
@@ -326,4 +322,7 @@ export default function StepperForm() {
     </div>
   );
 }
+
+
+
 

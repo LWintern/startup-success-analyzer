@@ -1,9 +1,12 @@
+// utils/formula.ts
+import { StartupData } from '../types/formula';
+
 /**
  * Calculates the total score for a startup based on the generic scoring system.
- * @param {Object} startupData - An object containing the startup's data.
+ * @param {StartupData} startupData - An object containing the startup's data.
  * @returns {Object} - An object with the calculated total score and category.
  */
-export function evaluateStartup(startupData) {
+export function evaluateStartup(startupData: StartupData) {
   // Extract scores from the input data
   const {
     revenueGrowth,
@@ -63,18 +66,3 @@ export function evaluateStartup(startupData) {
     category
   };
 }
-
-// Example usage:
-export const startupExample = {
-  revenueGrowth: 8, // Score out of 10
-  marketDemand: 7, // Score out of 10
-  financialHealth: 6, // Score out of 10
-  teamStrength: 9, // Score out of 10
-  productViability: 8, // Score out of 10
-  operationalEfficiency: 7, // Score out of 10
-  growthBarriers: 6, // Score out of 10
-  competitiveEdge: 8 // Score out of 10
-};
-
-export const result = evaluateStartup(startupExample);
-console.log(result);
