@@ -220,25 +220,6 @@ const mapStruggleReasonToScore = (reason: string): number => {
     }
   };
 
-  // Load sample data
-  // const loadSampleData = () => {
-  //   // Create sample data with all fields needed by the formula
-  //   const sampleData: Record<string, string | string[]> = {
-  //     'Revenue Growth': '10',
-  //     'Market Demand': '10',
-  //     'Financial Health': '10',
-  //     'Team Strength': '10',
-  //     'Product Viability': '8',
-  //     'Operational Efficiency': '7',
-  //     'Growth Barriers': '5',
-  //     'Competitive Edge': '8',
-  //     // Add any other fields required by your form
-  //   };
-    
-  //   setFormData(sampleData);
-  //   setCompletedSteps(new Set(Array.from({ length: totalSteps }, (_, i) => i + 1)));
-  //   setActiveStep(totalSteps);
-  // };
 
   useEffect(() => {
     // Update completed steps when active step changes
@@ -372,16 +353,7 @@ const mapStruggleReasonToScore = (reason: string): number => {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 pl-8 relative z-10">
-            {/* <div className="flex justify-between items-center mb-4">
-              <h2 className="text-sm text-gray-500">Approx Time: 2 Mins</h2>
-              <Button 
-                onClick={loadSampleData} 
-                className="bg-blue-500 hover:bg-blue-700 text-white"
-              >
-                Fill with Sample Data
-              </Button>
-            </div> */}
-
+ 
             <div className="space-y-4">
               {currentStep.fields.map((field, index) => (
                 <div key={index} className="grid grid-cols-[150px_1fr] items-center gap-4">
